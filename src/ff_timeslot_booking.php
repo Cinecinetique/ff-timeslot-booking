@@ -16,5 +16,6 @@ Author URI: https://cinecinetique.com
 
 require (__DIR__ . '/classes/FF_Timeslot_Booking.php') ;
 
+global $wpdb;
 
-$timeslot_booking = new FF_Timeslot_Booking();
+$timeslot_booking = new FF_Timeslot_Booking($wpdb);
