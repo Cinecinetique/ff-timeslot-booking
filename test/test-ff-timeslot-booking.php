@@ -27,7 +27,7 @@ class Retreat_Registration_For_Formidable_Forms_Test extends PHPUnit_Framework_T
     function test_update_session_booked_field () {
       $ff_tsb = new FF_Timeslot_Booking () ;
 
-      $this->assertTrue($ff_tsb->update_session_booked_field);
+      $this->assertTrue($ff_tsb->update_session_booked_field());
     }
 
 
