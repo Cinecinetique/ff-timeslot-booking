@@ -35,9 +35,11 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
 
     }
 
-    function disabled_test_booked_field_in_session_is_updated () {
+    function test_booked_field_in_session_is_updated () {
 
-      $_POST['item_meta'] = array( 103 => 71) ;
+      $session_id_in_booking_form = 103 ;
+      $fake_session_id = 71 ;
+      $_POST['item_meta'] = array( $session_id_in_booking_form => $fake_session_id) ;
 
       $wpdb = $this->getMockBuilder('Db')
                  ->setMethods(array('update'))
@@ -47,7 +49,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
                  ->setMethods(array('item_metas'))
                  ->getMock();
 
-      $tsb = new FF_Timeslot_Booking ($wpdb) ;
+      $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
       $item_metas = [] ;
       $frmdb->expects($this->once())
@@ -59,7 +61,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
             ->with(
             $item_metas,
             array($this->equalTo('meta_value'), "Yes" ),
-            array($this->equalTo('item_id'), 71 )
+            array($this->equalTo('item_id'), $fake_session_id )
             ) ;
     }
 
