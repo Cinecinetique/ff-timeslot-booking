@@ -41,6 +41,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
       $frmdb->method('entry_metas')
               ->willReturn(1);
 
+
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
       // return something true if right form

@@ -4,7 +4,7 @@
  * Loading code to test
  */
 
-require_once 'src/ff_timeslot_booking.php';
+require_once 'src/classes/FF_Timeslot_Booking.php';
 
 /**
  * Loading composer dependencies.
