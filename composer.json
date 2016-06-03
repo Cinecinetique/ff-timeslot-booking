@@ -4,6 +4,9 @@
         "phpunit/php-invoker": "^1.1",
         "phpunit/dbunit": "> 1.2"
     },
+    "autoload": {
+      "classmap": ["src/ff-timeslot-booking.php", "src/classes/"]
+    },
     "require-dev": {
         "10up/wp_mock": "dev-master"
     }

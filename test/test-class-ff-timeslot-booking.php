@@ -1,5 +1,7 @@
 <?php
 
+use \Mockery as m;
+
 class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
 
     private $session_field_id_in_booking_form ;
@@ -7,7 +9,6 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
     private $fake_session_id ;
 
     public function setUp() {
-          \WP_Mock::setUp();
           $session_field_id_in_booking_form = 103 ;
           $booked_field_id_in_session_form = 44 ;
           $fake_session_id = 71 ;
@@ -15,13 +16,13 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
     }
 
     public function tearDown() {
-          \WP_Mock::tearDown();
+      m::close();
     }
 
 
     function test_class_can_be_instantiated () {
-      $wpdb = new \stdClass;
-      $frmdb = new \stdClass;
+      $wpdb = new stdClass;
+      $frmdb = new stdClass;
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
       $this->assertNotNull($tsb->get_wpdb());
@@ -29,15 +30,12 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
     }
 
     function test_action_verifies_form_parameter () {
-      $wpdb = $this->getMockBuilder('Wpdb')
-              ->disableOriginalConstructor()
-              ->setMethods(array ('update'))
-              ->getMock();
+      $wpdb = m::mock ('wpdb');
+      $frmdb = new stdClass;
 
-      $frmdb = new \stdClass;
+      $wpdb->shouldReceive('update');
+
       $frmdb->entry_metas = array (1,2) ;
-
-
 
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
@@ -55,28 +53,21 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
 
       $fake_session_id = 71 ;
       $booked_field_id_in_session_form = 44 ;
-      $item_metas = 1 ;
+      $entry_metas = 1 ;
       $form_id = 2 ;
 
-      $wpdb = $this ->getMockBuilder('Db')
-                    ->disableOriginalConstructor()
-                    ->setMethods(array ('update'))
-                    ->getMock();
+      $wpdb = m::mock('wpdb');
+      $frmdb = new stdClass;
 
-
-      $frmdb = new \stdClass;
-      $frmdb->entry_metas = $item_metas ;
+      $frmdb->entry_metas = $entry_metas ;
 
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
-
-
-      $wpdb->expects($this->once())
-            ->method('update')
+      $wpdb->shouldReceive('update')
             ->with(
-            $item_metas,
-            array ('meta_value' => 'Yes' ),
-            array ('item_id' => $fake_session_id , 'field_id' => $booked_field_id_in_session_form )
+              $entry_metas,
+              array ('meta_value' => 'Yes' ),
+              array ('item_id' => $fake_session_id , 'field_id' => $booked_field_id_in_session_form )
             ) ;
 
       $tsb->update_session_booked_field(null, $form_id) ;

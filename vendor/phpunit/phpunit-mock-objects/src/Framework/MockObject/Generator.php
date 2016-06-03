@@ -134,8 +134,9 @@ class PHPUnit_Framework_MockObject_Generator
      * @param bool         $cloneArguments
      * @param bool         $callOriginalMethods
      * @param object       $proxyTarget
+     * @param bool         $allowMockingUnknownTypes
      *
-     * @return object
+     * @return PHPUnit_Framework_MockObject_MockObject
      *
      * @throws InvalidArgumentException
      * @throws PHPUnit_Framework_Exception
@@ -143,7 +144,7 @@ class PHPUnit_Framework_MockObject_Generator
      *
      * @since  Method available since Release 1.0.0
      */
-    public function getMock($type, $methods = [], array $arguments = [], $mockClassName = '', $callOriginalConstructor = true, $callOriginalClone = true, $callAutoload = true, $cloneArguments = true, $callOriginalMethods = false, $proxyTarget = null)
+    public function getMock($type, $methods = [], array $arguments = [], $mockClassName = '', $callOriginalConstructor = true, $callOriginalClone = true, $callAutoload = true, $cloneArguments = true, $callOriginalMethods = false, $proxyTarget = null, $allowMockingUnknownTypes = true)
     {
         if (!is_array($type) && !is_string($type)) {
             throw PHPUnit_Util_InvalidArgumentHelper::factory(1, 'array or string');
@@ -162,18 +163,47 @@ class PHPUnit_Framework_MockObject_Generator
         }
 
         if (is_array($type)) {
-            $type = array_unique(array_map(
-                function ($type) {
-                    if ($type === 'Traversable' ||
-                      $type === '\\Traversable' ||
-                      $type === '\\Iterator') {
-                        return 'Iterator';
-                    }
+            $type = array_unique(
+                array_map(
+                    function ($type) {
+                        if ($type === 'Traversable' ||
+                            $type === '\\Traversable' ||
+                            $type === '\\Iterator') {
+                            return 'Iterator';
+                        }
 
-                    return $type;
-                },
-                $type
-            ));
+                        return $type;
+                    },
+                    $type
+                )
+            );
+        }
+
+        if (!$allowMockingUnknownTypes) {
+            if (is_array($type)) {
+                foreach ($type as $_type) {
+                    if (!class_exists($_type, $callAutoload) &&
+                        !interface_exists($_type, $callAutoload)) {
+                        throw new PHPUnit_Framework_MockObject_RuntimeException(
+                            sprintf(
+                                'Cannot stub or mock class or interface "%s" which does not exist',
+                                $_type
+                            )
+                        );
+                    }
+                }
+            } else {
+                if (!class_exists($type, $callAutoload) &&
+                    !interface_exists($type, $callAutoload)
+                ) {
+                    throw new PHPUnit_Framework_MockObject_RuntimeException(
+                        sprintf(
+                            'Cannot stub or mock class or interface "%s" which does not exist',
+                            $type
+                        )
+                    );
+                }
+            }
         }
 
         if (null !== $methods) {
@@ -325,7 +355,7 @@ class PHPUnit_Framework_MockObject_Generator
      * @param array  $mockedMethods
      * @param bool   $cloneArguments
      *
-     * @return object
+     * @return PHPUnit_Framework_MockObject_MockObject
      *
      * @since  Method available since Release 1.0.0
      *
@@ -388,7 +418,7 @@ class PHPUnit_Framework_MockObject_Generator
      * @param array  $mockedMethods
      * @param bool   $cloneArguments
      *
-     * @return object
+     * @return PHPUnit_Framework_MockObject_MockObject
      *
      * @since  Method available since Release 1.2.3
      *
@@ -428,9 +458,9 @@ class PHPUnit_Framework_MockObject_Generator
 
         $classTemplate->setVar(
             [
-            'prologue'   => 'abstract ',
-            'class_name' => $className['className'],
-            'trait_name' => $traitName
+                'prologue'   => 'abstract ',
+                'class_name' => $className['className'],
+                'trait_name' => $traitName
             ]
         );
 
@@ -492,9 +522,9 @@ class PHPUnit_Framework_MockObject_Generator
 
         $classTemplate->setVar(
             [
-            'prologue'   => '',
-            'class_name' => $className['className'],
-            'trait_name' => $traitName
+                'prologue'   => '',
+                'class_name' => $className['className'],
+                'trait_name' => $traitName
             ]
         );
 
@@ -971,6 +1001,12 @@ class PHPUnit_Framework_MockObject_Generator
             $returnType = '';
         }
 
+        if (preg_match('#\*[ \t]*+@deprecated[ \t]*+(.*?)\r?+\n[ \t]*+\*(?:[ \t]*+@|/$)#s', $method->getDocComment(), $deprecation)) {
+            $deprecation = trim(preg_replace('#[ \t]*\r?\n[ \t]*+\*[ \t]*+#', ' ', $deprecation[1]));
+        } else {
+            $deprecation = false;
+        }
+
         return $this->generateMockedMethodDefinition(
             $templateDir,
             $method->getDeclaringClass()->getName(),
@@ -982,7 +1018,8 @@ class PHPUnit_Framework_MockObject_Generator
             $returnType,
             $reference,
             $callOriginalMethods,
-            $method->isStatic()
+            $method->isStatic(),
+            $deprecation
         );
     }
 
@@ -998,10 +1035,11 @@ class PHPUnit_Framework_MockObject_Generator
      * @param string $reference
      * @param bool   $callOriginalMethods
      * @param bool   $static
+     * @param string $deprecation
      *
      * @return string
      */
-    private function generateMockedMethodDefinition($templateDir, $className, $methodName, $cloneArguments = true, $modifier = 'public', $arguments_decl = '', $arguments_call = '', $return_type = '', $reference = '', $callOriginalMethods = false, $static = false)
+    private function generateMockedMethodDefinition($templateDir, $className, $methodName, $cloneArguments = true, $modifier = 'public', $arguments_decl = '', $arguments_call = '', $return_type = '', $reference = '', $callOriginalMethods = false, $static = false, $deprecation = false)
     {
         if ($static) {
             $templateFile = 'mocked_static_method.tpl';
@@ -1019,20 +1057,32 @@ class PHPUnit_Framework_MockObject_Generator
             $return_type = $className;
         }
 
+        if (false !== $deprecation) {
+            $deprecation = "The $className::$methodName method is deprecated ($deprecation).";
+            $deprecationTemplate = new Text_Template($templateDir . 'deprecation.tpl');
+            $deprecationTemplate->setVar(
+                array(
+                'deprecation' => var_export($deprecation, true),
+                )
+            );
+            $deprecation = $deprecationTemplate->render();
+        }
+
         $template = new Text_Template($templateDir . $templateFile);
 
         $template->setVar(
             [
-            'arguments_decl'  => $arguments_decl,
-            'arguments_call'  => $arguments_call,
-            'return_delim'    => $return_type ? ': ' : '',
-            'return_type'     => $return_type,
-            'arguments_count' => !empty($arguments_call) ? count(explode(',', $arguments_call)) : 0,
-            'class_name'      => $className,
-            'method_name'     => $methodName,
-            'modifier'        => $modifier,
-            'reference'       => $reference,
-            'clone_arguments' => $cloneArguments ? 'true' : 'false'
+                'arguments_decl'  => $arguments_decl,
+                'arguments_call'  => $arguments_call,
+                'return_delim'    => $return_type ? ': ' : '',
+                'return_type'     => $return_type,
+                'arguments_count' => !empty($arguments_call) ? count(explode(',', $arguments_call)) : 0,
+                'class_name'      => $className,
+                'method_name'     => $methodName,
+                'modifier'        => $modifier,
+                'reference'       => $reference,
+                'clone_arguments' => $cloneArguments ? 'true' : 'false',
+                'deprecation'     => $deprecation
             ]
         );
 
@@ -1205,7 +1255,7 @@ class PHPUnit_Framework_MockObject_Generator
      *
      * @since  Method available since Release 2.3.2
      */
-    private function getClassMethods($className)
+    public function getClassMethods($className)
     {
         $class   = new ReflectionClass($className);
         $methods = [];
