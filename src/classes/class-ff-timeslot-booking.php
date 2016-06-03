@@ -25,24 +25,29 @@ class FF_Timeslot_Booking {
 
   public function update_session_booked_field ($entry_id, $form_id) {
 
+    $flag_update_result = null ;
+    $email_update_result = null ;
     $session_id = $_POST['item_meta'][self::SESSION_FIELD_ID_IN_BOOKING_FORM];
     $client_email = $_POST['item_meta'][self::EMAIL_FIELD_ID_IN_BOOKING_FORM];
 
     if ( self::BOOKING_FORM_ID == $form_id && $this->_wpdb && $this->_frmdb) {
 
 
-      $this->_wpdb->update(
+      $flag_update_result = $this->_wpdb->update(
         $this->_frmdb->entry_metas,
         array ( 'meta_value' => 'Yes' ),
         array ( 'item_id' => $session_id, 'field_id' => self::BOOKED_FIELD_ID_IN_SESSION_FORM )
       );
 
-      $this->_wpdb->update(
+      $email_update_result = $this->_wpdb->update(
         $this->_frmdb->entry_metas,
         array ( 'meta_value' => $client_email ),
         array ( 'item_id' => $session_id, 'field_id' => self::EMAIL_FIELD_ID_IN_SESSION_FORM )
       );
 
+      if ( false === $email_update_result ) {
+        throw new Exception('Error Updating the email field: ' . $this->_wpdb->last_error);
+      }
 
       return true;
     }
