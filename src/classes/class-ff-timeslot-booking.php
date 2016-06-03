@@ -50,7 +50,7 @@ class FF_Timeslot_Booking {
       );
 
       if ( false === $email_update_result ) {
-        throw new Exception('Error Updating the email field: ' . $this->_wpdb->last_error);
+        throw new Exception('Error updating the email field: ' . $this->_wpdb->last_error);
       }
 
       return true;

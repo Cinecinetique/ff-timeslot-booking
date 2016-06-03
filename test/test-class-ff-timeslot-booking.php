@@ -136,7 +136,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
     }
     /**
      * @expectedException Exception
-     * @expectedExceptionMessage Error Updating the email field: db
+     * @expectedExceptionMessage Error updating the email field: db
      */
     function test_email_update_error_throws_exception () {
 
