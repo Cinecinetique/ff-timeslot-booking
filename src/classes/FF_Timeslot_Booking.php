@@ -27,7 +27,7 @@ class FF_Timeslot_Booking {
 
       $session_id = $_POST['item_meta'][self::SESSION_FIELD_ID_IN_BOOKING_FORM];
       $this->_wpdb->update(
-        $this->_frmdb->entry_metas(),
+        $this->_frmdb->entry_metas,
         array ( 'meta_value' => "Yes" ),
         array ( 'item_id' => $session_id, 'field_id' => self::SESSION_BOOKED_FIELD_ID )
       );

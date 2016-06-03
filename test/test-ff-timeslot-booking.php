@@ -33,13 +33,10 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
               ->disableOriginalConstructor()
               ->setMethods(array ('update'))
               ->getMock();
-      $frmdb = $this->getMockBuilder('Frmdb')
-              ->disableOriginalConstructor()
-              ->setMethods(array ('entry_metas'))
-              ->getMock();
 
-      $frmdb->method('entry_metas')
-              ->willReturn(1);
+      $frmdb = new \stdClass;
+      $frmdb->entry_metas = array (1,2) ;
+
 
 
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
@@ -66,16 +63,13 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
                     ->setMethods(array ('update'))
                     ->getMock();
 
-      $frmdb = $this->getMockBuilder('FrmDb')
-                    ->disableOriginalConstructor()
-                    ->setMethods(array ('entry_metas'))
-                    ->getMock();
+
+      $frmdb = new \stdClass;
+      $frmdb->entry_metas = $item_metas ;
 
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
-      $frmdb->expects($this->once())
-            ->method('entry_metas')
-            ->willReturn($item_metas);
+
 
       $wpdb->expects($this->once())
             ->method('update')
