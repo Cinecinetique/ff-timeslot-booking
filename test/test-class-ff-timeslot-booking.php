@@ -41,7 +41,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
       $wpdb = m::mock ('wpdb') ;
       $frmdb = new stdClass ;
 
-      $wpdb->shouldReceive('update') ;
+      $wpdb->shouldReceive('replace') ;
 
       $frmdb->entry_metas = array (1,2) ;
 
@@ -73,7 +73,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
 
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
-      $wpdb->shouldReceive('update')
+      $wpdb->shouldReceive('replace')
             ->with(
               $entry_metas,
               array ('meta_value' => 'Yes' ),
@@ -82,7 +82,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
             ->times(1)
             ->andReturn(1) ;
 
-      $wpdb->shouldReceive('update')
+      $wpdb->shouldReceive('replace')
             ->with(
               $entry_metas,
               array ('meta_value' => $client_email ),
@@ -118,7 +118,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
 
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
-      $wpdb->shouldReceive('update')
+      $wpdb->shouldReceive('replace')
             ->with(
               $entry_metas,
               array ('meta_value' => 'Yes' ),
@@ -127,7 +127,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
             ->once()
             ->andReturn(false) ;
 
-      $wpdb->shouldReceive('update')
+      $wpdb->shouldReceive('replace')
             ->never() ;
 
       $tsb->update_session_booked_field(null, $form_id) ;
@@ -155,7 +155,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
 
       $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
 
-      $wpdb->shouldReceive('update')
+      $wpdb->shouldReceive('replace')
             ->with(
               $entry_metas,
               array ('meta_value' => 'Yes' ),
@@ -164,7 +164,7 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
             ->once()
             ->andReturn(1) ;
 
-      $wpdb->shouldReceive('update')
+      $wpdb->shouldReceive('replace')
             ->with(
               $entry_metas,
               array ('meta_value' => $client_email ),
