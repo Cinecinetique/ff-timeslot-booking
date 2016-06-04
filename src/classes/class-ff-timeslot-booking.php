@@ -40,7 +40,25 @@ class FF_Timeslot_Booking {
       );
 
       if ( false === $flag_update_result ) {
-        throw new Exception('Error updating the booked flag field: ' . $this->_wpdb->last_error);
+
+        $flag_update_result = $this->_wpdb->insert(
+          $this->_frmdb->entry_metas,
+          array (
+            'meta_value' => 'Yes',
+            'field_id' => self::BOOKED_FIELD_ID_IN_SESSION_FORM,
+            'item_id' => $session_id
+          ),
+          array (
+            '%s',
+            '%d',
+            '%d'
+          )
+        );
+
+        if ( false === $flag_update_result ) {
+          throw new Exception('Error updating the booked flag field: ' . $this->_wpdb->last_error);
+        }
+
       }
 
       $email_update_result = $this->_wpdb->update(
@@ -50,7 +68,24 @@ class FF_Timeslot_Booking {
       );
 
       if ( false === $email_update_result ) {
-        throw new Exception('Error updating the email field: ' . $this->_wpdb->last_error);
+
+        $email_update_result = $this->_wpdb->insert(
+          $this->_frmdb->entry_metas,
+          array (
+            'meta_value' => $client_email,
+            'field_id' => self::EMAIL_FIELD_ID_IN_SESSION_FORM,
+            'item_id' => $session_id
+          ),
+          array (
+            '%s',
+            '%d',
+            '%d'
+          )
+        );
+
+        if ( false === $email_update_result ) {
+          throw new Exception('Error updating the email field: ' . $this->_wpdb->last_error);
+        }
       }
 
       return true;
