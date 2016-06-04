@@ -33,7 +33,7 @@ class FF_Timeslot_Booking {
     if ( self::BOOKING_FORM_ID == $form_id && $this->_wpdb && $this->_frmdb) {
 
 
-      $flag_update_result = $this->_wpdb->replace(
+      $flag_update_result = $this->_wpdb->update(
         $this->_frmdb->entry_metas,
         array ( 'meta_value' => 'Yes' ),
         array ( 'item_id' => $session_id, 'field_id' => self::BOOKED_FIELD_ID_IN_SESSION_FORM )
@@ -43,7 +43,7 @@ class FF_Timeslot_Booking {
         throw new Exception('Error updating the booked flag field: ' . $this->_wpdb->last_error);
       }
 
-      $email_update_result = $this->_wpdb->replace(
+      $email_update_result = $this->_wpdb->update(
         $this->_frmdb->entry_metas,
         array ( 'meta_value' => $client_email ),
         array ( 'item_id' => $session_id, 'field_id' => self::EMAIL_FIELD_ID_IN_SESSION_FORM )
