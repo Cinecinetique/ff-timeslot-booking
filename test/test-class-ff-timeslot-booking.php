@@ -120,6 +120,81 @@ class FF_Timeslot_Booking_Test extends PHPUnit_Framework_TestCase {
               array ('item_id' => $fake_session_id , 'field_id' => $booked_field_id_in_session_form )
             )
             ->once()
+            ->andReturn(0) ;
+
+      $wpdb->shouldReceive('update')
+            ->with(
+              $entry_metas,
+              array ('meta_value' => $client_email ),
+              array ('item_id' => $fake_session_id , 'field_id' => $email_field_id_in_session_form )
+            )
+            ->once()
+            ->andReturn(0) ;
+
+
+      $wpdb->shouldReceive('insert')
+            ->with(
+              $entry_metas,
+              array (
+                'meta_value' => 'Yes',
+                'field_id' => $booked_field_id_in_session_form,
+                'item_id' => $fake_session_id
+             ),
+              array (
+                '%s',
+                '%d',
+                '%d'
+              )
+            )
+            ->once()
+            ->andReturn(1) ;
+
+      $wpdb->shouldReceive('insert')
+            ->with(
+              $entry_metas,
+              array (
+                'meta_value' => $client_email,
+                'field_id' => $email_field_id_in_session_form,
+                'item_id' => $fake_session_id
+               ),
+              array (
+                '%s',
+                '%d',
+                '%d'
+              )
+            )
+            ->once()
+            ->andReturn(1) ;
+
+      $tsb->update_session_booked_field(null, $form_id) ;
+
+
+    }
+
+    function test_class_creates_booked_flag_and_client_email_fields_records_if_update_fails () {
+
+      $fake_session_id = 71 ;
+      $booked_field_id_in_session_form = 44 ;
+      $email_field_id_in_session_form = 102 ;
+      $entry_metas = 1 ;
+      $client_email = "foo@bar.com";
+      $form_id = 2 ;
+
+      $wpdb = m::mock('stdClass')->makePartial() ;
+      $wpdb->last_error = 'db' ;
+      $frmdb = new stdClass ;
+
+      $frmdb->entry_metas = $entry_metas ;
+
+      $tsb = new FF_Timeslot_Booking ($wpdb, $frmdb) ;
+
+      $wpdb->shouldReceive('update')
+            ->with(
+              $entry_metas,
+              array ('meta_value' => 'Yes' ),
+              array ('item_id' => $fake_session_id , 'field_id' => $booked_field_id_in_session_form )
+            )
+            ->once()
             ->andReturn(false) ;
 
       $wpdb->shouldReceive('update')

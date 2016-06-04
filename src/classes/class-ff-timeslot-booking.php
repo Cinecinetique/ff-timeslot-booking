@@ -39,7 +39,7 @@ class FF_Timeslot_Booking {
         array ( 'item_id' => $session_id, 'field_id' => self::BOOKED_FIELD_ID_IN_SESSION_FORM )
       );
 
-      if ( false === $flag_update_result ) {
+      if ( 0 === $flag_update_result || false === $flag_update_result ) {
 
         $flag_update_result = $this->_wpdb->insert(
           $this->_frmdb->entry_metas,
@@ -67,7 +67,7 @@ class FF_Timeslot_Booking {
         array ( 'item_id' => $session_id, 'field_id' => self::EMAIL_FIELD_ID_IN_SESSION_FORM )
       );
 
-      if ( false === $email_update_result ) {
+      if ( 0 === $email_update_result || false === $email_update_result ) {
 
         $email_update_result = $this->_wpdb->insert(
           $this->_frmdb->entry_metas,
