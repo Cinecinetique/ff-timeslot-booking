@@ -23,7 +23,7 @@ Class FF_Timeslot_Booking_Main {
 
     $timeslot_booking = new FF_Timeslot_Booking($wpdb, $frmdb);
 
-    add_action('frm_after_create_entry', array ($timeslot_booking, 'update_session_booked_field'), 30, 2);
+    add_action('frm_after_create_entry', array ($timeslot_booking, 'update_session_booked_field'), 45, 2);
 
   }
 }
